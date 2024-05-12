@@ -28,13 +28,19 @@ Ensure you have the following Python libraries installed:
 Install the required dependencies via pip:
 
 ```bash
-' pip install streamlit pandas scikit-learn plotly '
+pip install streamlit pandas scikit-learn plotly
 
-## Usage
- To run the application, execute the following command in your terminal:
 ```
 
-- streamlit run main.py
+## Usage
+
+To run the application, execute the following command in your terminal:
+
+```bash
+
+streamlit run main.py
+
+```
 
 Replace main.py with the path to the script if your setup requires it.
 
