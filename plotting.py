@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 import numpy as np
 
-def create_similarities_plot(titles, similarities, links):
+def create_similarities_plot(titles, similarities, links, user_query):
 
   # Convert Similaritys to Percentages
   similarities_percentages = similarities * 100 
@@ -15,7 +15,7 @@ def create_similarities_plot(titles, similarities, links):
       size=20, color=similarities_percentages, colorscale='Bluered',
     ),
     customdata=links,
-    hovertemplate="<br>%{text}</b><br><br>Similarity: %{x:.2f}%<extra></extra>",
+    hovertemplate=f"<br>%{{text}}</b> <br> similar in %{{x:.2f}} %<br> to {user_query}<extra></extra>",
     )])
   fig.update_layout(
     title='Click on a point to view details: ',

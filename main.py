@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import json
 
 # Importing functions from other modules
 from data_processing import load_data
@@ -8,6 +9,23 @@ from similarity import get_embedding, find_most_similar_embeddings
 from plotting import create_similarities_plot
 
 
+# Function to load the CSV file and handle null bytes
+def load_data(file_path):
+    with open(file_path, 'r', errors='replace') as f:
+        data = pd.read_csv(f)
+    return data
+
+# Function to process and retrive data from the dataset
+def get_display_data(data):
+    data['upper_title'] = data['Title'].apply(str.upper)
+    return data
+
+# Function to safely convert string embeddings to list
+def safe_eval(embedding_str):
+    try:
+        return json.loads(embedding_str.replace('...', ''))  # Handle malformed strings
+    except json.JSONDecodeError:
+        return None  # Handle or log the error as needed
 
 header = st.container()
 dataset = st.container()
@@ -18,9 +36,16 @@ model_training = st.container()
 data = load_data('wikiLex/wikip_ai_glossary.csv')
 
 
+processed_data = get_display_data(data)
+
+# Apply the function and filter out any None values
+processed_data['High_dimensional_embeddings'] = processed_data['High_dimensional_embeddings'].apply(safe_eval)
+processed_data = processed_data.dropna(subset=['High_dimensional_embeddings'])
+
+# Ensure embeddings are precomputed and loaded
+data_embeddings = np.vstack(processed_data['High_dimensional_embeddings'].values)
 
 with features:
-
     st.header('Features Created from Lexicon')
 
 with model_training:
@@ -29,7 +54,6 @@ with model_training:
 
 
 
-data_embeddings = np.vstack(data['High_dimensional_embeddings'].values)
 
 # Search for Similar Documents
 st.title('Similar documents based on Query: ')
@@ -40,25 +64,19 @@ if user_query:
     top_indices, similarities = find_most_similar_embeddings(query_embedding, data_embeddings, top_k=6)
 
     # Extracting titles and links for the similar documents
-    titles = data['Title'].iloc[top_indices].tolist()
-    links = data['Link'].iloc[top_indices].tolist()
+    titles = processed_data['Title'].iloc[top_indices].tolist()
+    links = processed_data['Link'].iloc[top_indices].tolist()
 
-    fig = create_similarities_plot(titles, similarities, links)
+    fig = create_similarities_plot(titles, similarities, links, user_query)
     st.plotly_chart(fig, use_container_width=True)
 
     # Display clickable top similar documents
     st.write('Click on a document to learn more about the similar documents:')
-    for title, link in zip(titles, links):
-        st.markdown(f"[{title}]({link})")
+    for title, link , similarities_percentages in zip(titles, links, similarities):
+        # Convert Similaritys to Percentages
+        similarities_percentages = similarities_percentages * 100
+        st.markdown(f"[{title}]({link}) - {similarities_percentages:.2f} %")
 
-
-
-# Function to process and retrive data from the dataset
-def get_display_data(data):
-    data['upper_title'] = data['Title'].apply(str.upper)
-    return data
-
-processed_data = get_display_data(data)
 
 # Based on the user text query
 def filter_data(query, data):
