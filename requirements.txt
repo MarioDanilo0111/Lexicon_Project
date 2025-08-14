@@ -74,3 +74,4 @@ typing_extensions==4.11.0
 tzdata==2024.1
 urllib3==2.2.1
 wcwidth==0.2.13
+sentence-transformers==2.7.0
