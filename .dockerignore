@@ -1,0 +1,13 @@
+env/
+.env
+venv/
+__pycache__/
+.pytest_cache/
+.git
+.gitignore
+.DS_Store
+.mypy_cache/
+.node_modules/
+.streamlit/
+*.ipynb
+*.pyc
